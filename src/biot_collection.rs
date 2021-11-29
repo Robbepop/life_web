@@ -18,6 +18,8 @@ impl BiotCollection {
 
     /// Compute one step of the simulation.
     pub fn step(&mut self) {
+        // Clear offsprings in case there are still some from last step.
+        self.offsprings.clear();
         // R-star datastructure used for quickly locating neighbors.
         let tree: RTree<TreePoint> = RTree::bulk_load(
             self.biots
