@@ -6,18 +6,18 @@ use rstar::{PointDistance, RTree, RTreeObject, AABB};
 #[derive(Debug, Copy, Clone)]
 #[repr(u8)]
 pub enum Gene {
-    /// A gene that does nothing observable.
-    None = 0,
     /// Influences the attack value of the biot.
-    Attack = 1,
+    Attack = 0,
     /// Influences the defensive value of the biot.
-    Defense = 2,
+    Defense = 1,
     /// Influences how well the biot can generate energy from sunlight.
-    Photosynthesis = 3,
+    Photosynthesis = 2,
     /// Influences how fast the biot can move around.
-    Motion = 4,
+    Motion = 3,
     /// Influences the intelligence of the biot.
-    Intelligence = 5,
+    Intelligence = 4,
+    /// A gene that does nothing observable.
+    None = 5,
 }
 
 impl Gene {
@@ -25,12 +25,11 @@ impl Gene {
     pub fn random() -> Self {
         let random = rand::gen_range::<u8>(0, 5);
         match random {
-            0 => Self::None,
-            1 => Self::Attack,
-            2 => Self::Defense,
-            3 => Self::Photosynthesis,
-            4 => Self::Motion,
-            5 => Self::Intelligence,
+            0 => Self::Attack,
+            1 => Self::Defense,
+            2 => Self::Photosynthesis,
+            3 => Self::Motion,
+            4 => Self::Intelligence,
             _ => unreachable!("encountered unexpected random gene index {random}"),
         }
     }
@@ -45,7 +44,7 @@ pub struct Genome {
 impl Genome {
     /// Creates a random biot genome.
     pub fn random() -> Self {
-        let mut genes = [Gene::Attack; 13];
+        let mut genes = [Gene::None; 13];
         for gene in &mut genes {
             *gene = Gene::random();
         }
