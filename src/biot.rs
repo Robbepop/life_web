@@ -185,8 +185,8 @@ impl Biot {
         if self.stats.life >= self.base_life() * adult_factor {
             let close_by = rtree
                 .nearest_neighbor_iter_with_distance_2(&[
-                    self.stats.pos.x as f64,
-                    self.stats.pos.y as f64,
+                    self.stats.pos.x,
+                    self.stats.pos.y,
                 ])
                 .nth(5);
             if close_by.map_or(true, |(_, d2)| d2 > 200.) {
@@ -287,13 +287,13 @@ impl Biot {
 /// Helper structure used for the rstar geometric data structure. This data structure is used for
 /// computing interaction between biots fluidly even with thousands of them
 pub struct TreePoint {
-    pub x: f64,
-    pub y: f64,
+    pub x: f32,
+    pub y: f32,
     pub idx: usize,
 }
 
 impl RTreeObject for TreePoint {
-    type Envelope = AABB<[f64; 2]>;
+    type Envelope = AABB<[f32; 2]>;
     fn envelope(&self) -> Self::Envelope {
         AABB::from_point([self.x, self.y])
     }

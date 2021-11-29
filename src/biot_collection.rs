@@ -27,8 +27,8 @@ impl BiotCollection {
                 .enumerate()
                 .map(|(idx, biot)| TreePoint {
                     idx,
-                    x: biot.stats.pos.x as f64,
-                    y: biot.stats.pos.y as f64,
+                    x: biot.stats.pos.x,
+                    y: biot.stats.pos.y,
                 })
                 .collect(),
         );
