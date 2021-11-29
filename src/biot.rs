@@ -241,6 +241,11 @@ impl Biot {
         self.stats.life <= 0.0 || self.stats.age >= 10000
     }
 
+    /// Returns `true` if the biot is dead.
+    pub fn is_alive(&self) -> bool {
+        !self.is_dead()
+    }
+
     /// Returns `true` if `self` is stronger than `other`.
     pub fn is_stronger(&self, other: &Self) -> bool {
         self.properties.attack > other.properties.attack + other.properties.defense * 0.8
