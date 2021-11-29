@@ -27,29 +27,32 @@ impl BiotCollection {
                 .enumerate()
                 .map(|(idx, biot)| TreePoint {
                     idx,
-                    x: biot.pos.x as f64,
-                    y: biot.pos.y as f64,
+                    x: biot.stats.pos.x as f64,
+                    y: biot.stats.pos.y as f64,
                 })
                 .collect(),
         );
         // Move and reproduce biots
         for n in 0..(self.biots.len()) {
             let mut feed_dir: Option<Vec2> = None;
-            if self.biots[n].intelligence > 0. {
+            if self.biots[n].properties.intelligence > 0. {
                 for (other, d2) in tree.nearest_neighbor_iter_with_distance_2(&[
-                    self.biots[n].pos.x as f64,
-                    self.biots[n].pos.y as f64,
+                    self.biots[n].stats.pos.x as f64,
+                    self.biots[n].stats.pos.y as f64,
                 ]) {
-                    if d2 as f32 > (self.biots[n].intelligence * self.biots[n].intelligence) * 1600.
+                    if d2 as f32
+                        > (self.biots[n].properties.intelligence
+                            * self.biots[n].properties.intelligence)
+                            * 1600.
                     {
                         break;
                     }
-                    if self.biots[n].stronger(&self.biots[other.idx]) {
+                    if self.biots[n].is_stronger(&self.biots[other.idx]) {
                         // Add small offset to workaround rstart panic. TODO: report it upstream
                         feed_dir = Some(
                             vec2(
-                                other.x as f32 - self.biots[n].pos.x + 0.0001,
-                                other.y as f32 - self.biots[n].pos.y + 0.0001,
+                                other.x as f32 - self.biots[n].stats.pos.x + 0.0001,
+                                other.y as f32 - self.biots[n].stats.pos.y + 0.0001,
                             )
                             .normalize(),
                         );
@@ -74,42 +77,54 @@ impl BiotCollection {
             }
         }
         // Remove dead biots and add the new ones to the collection
-        self.biots.retain(|b| !b.dead());
+        self.biots.retain(|b| !b.is_dead());
         self.biots.append(&mut new);
     }
 
     /// Display the biot collection
     pub fn draw(&self) {
         for biot in self.biots.iter() {
-            if biot.intelligence > 0. {
-                let size = 14. * (biot.photosynthesis + biot.attack + biot.defense + biot.motion);
+            if biot.properties.intelligence > 0. {
+                let size = 14.
+                    * (biot.properties.photosynthesis
+                        + biot.properties.attack
+                        + biot.properties.defense
+                        + biot.properties.motion);
                 draw_rectangle(
-                    biot.pos.x - size / 2.,
-                    biot.pos.y - size / 2.,
+                    biot.stats.pos.x - size / 2.,
+                    biot.stats.pos.y - size / 2.,
                     size,
                     size,
                     GREEN,
                 );
             }
             draw_circle(
-                biot.pos.x,
-                biot.pos.y,
-                7. * (biot.photosynthesis + biot.attack + biot.defense + biot.motion),
+                biot.stats.pos.x,
+                biot.stats.pos.y,
+                7. * (biot.properties.photosynthesis
+                    + biot.properties.attack
+                    + biot.properties.defense
+                    + biot.properties.motion),
                 GREEN,
             );
             draw_circle(
-                biot.pos.x,
-                biot.pos.y,
-                7. * (biot.attack + biot.defense + biot.motion),
+                biot.stats.pos.x,
+                biot.stats.pos.y,
+                7. * (biot.properties.attack + biot.properties.defense + biot.properties.motion),
                 RED,
             );
             draw_circle(
-                biot.pos.x,
-                biot.pos.y,
-                7. * (biot.defense + biot.motion),
+                biot.stats.pos.x,
+                biot.stats.pos.y,
+                7. * (biot.properties.defense + biot.properties.motion),
                 DARKBLUE,
             );
-            draw_circle(biot.pos.x, biot.pos.y, 7. * (biot.motion), BLUE);
+            draw_circle(
+                biot.stats.pos.x,
+                biot.stats.pos.y,
+                7. * (biot.properties.motion),
+                BLUE,
+            );
         }
     }
 
