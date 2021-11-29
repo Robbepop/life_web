@@ -208,7 +208,7 @@ impl Biot {
         self.stats.life += (self.properties.photosynthesis - self.properties.metabolism()) * 0.4;
         if rand::gen_range(0., 1.) < 0.2 * self.properties.motion {
             let speed = 7. * self.properties.motion / self.properties.weight();
-            if self.properties.intelligence > 0. {
+            if self.properties.intelligence > 0.0 {
                 if let Some(feed_dir) = feed_dir {
                     self.accelerate(feed_dir, speed);
                 } else {
@@ -223,7 +223,7 @@ impl Biot {
     }
 
     /// Compute the interaction between two biots.
-    pub fn interact(biots: &mut Vec<Self>, i: usize, j: usize) {
+    pub fn interact(biots: &mut [Self], i: usize, j: usize) {
         let dist = (biots[i].stats.pos - biots[j].stats.pos).length();
         if dist < 10.0 * (biots[i].properties.weight() + biots[j].properties.weight()) {
             if biots[i].is_stronger(&biots[j]) {
