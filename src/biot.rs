@@ -172,15 +172,8 @@ impl Biot {
         stats.position_randomly();
         let mut s = Self {
             stats,
-            // life: 0.,
-            // pos: vec2(
-            //     rand::gen_range(0., 1.) * screen_width(),
-            //     rand::gen_range(0., 1.) * screen_height(),
-            // ),
-            // speed: vec2(0., 0.),
-            // age: 0,
             genome,
-            properties: Properties::default(),
+            properties,
         };
         s.stats.life = s.base_life();
         s
