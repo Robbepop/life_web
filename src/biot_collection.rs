@@ -5,22 +5,20 @@ use rstar::RTree;
 /// A collection of biots. Responsible for handling interactions between biots
 pub struct BiotCollection {
     biots: Vec<Biot>,
+    offsprings: Vec<Biot>,
 }
 
 impl BiotCollection {
-    /// Create n random biots
-    pub fn new(n: usize) -> Self {
-        let mut s = Self { biots: Vec::new() };
-        for _ in 0..n {
-            s.biots.push(Biot::random_biot());
-        }
-        s
+    /// Create `len` random biots.
+    pub fn new(len: usize) -> Self {
+        let biots = (0..len).map(|_| Biot::random_biot()).collect::<Vec<_>>();
+        let offsprings = Vec::new();
+        Self { biots, offsprings }
     }
 
     /// Compute one step of the simulation.
     pub fn step(&mut self) {
-        let mut new: Vec<Biot> = Vec::new();
-        // R-star datastructure used for quickly locating neighbors
+        // R-star datastructure used for quickly locating neighbors.
         let tree: RTree<TreePoint> = RTree::bulk_load(
             self.biots
                 .iter()
@@ -33,26 +31,26 @@ impl BiotCollection {
                 .collect(),
         );
         // Move and reproduce biots
-        for n in 0..(self.biots.len()) {
+        for idx in 0..(self.biots.len()) {
             let mut feed_dir: Option<Vec2> = None;
-            if self.biots[n].properties.intelligence > 0. {
+            if self.biots[idx].properties.intelligence > 0.0 {
                 for (other, d2) in tree.nearest_neighbor_iter_with_distance_2(&[
-                    self.biots[n].stats.pos.x as f64,
-                    self.biots[n].stats.pos.y as f64,
+                    self.biots[idx].stats.pos.x as f64,
+                    self.biots[idx].stats.pos.y as f64,
                 ]) {
                     if d2 as f32
-                        > (self.biots[n].properties.intelligence
-                            * self.biots[n].properties.intelligence)
-                            * 1600.
+                        > (self.biots[idx].properties.intelligence
+                            * self.biots[idx].properties.intelligence)
+                            * 1600.0
                     {
                         break;
                     }
-                    if self.biots[n].is_stronger(&self.biots[other.idx]) {
+                    if self.biots[idx].is_stronger(&self.biots[other.idx]) {
                         // Add small offset to workaround rstart panic. TODO: report it upstream
                         feed_dir = Some(
                             vec2(
-                                other.x as f32 - self.biots[n].stats.pos.x + 0.0001,
-                                other.y as f32 - self.biots[n].stats.pos.y + 0.0001,
+                                other.x as f32 - self.biots[idx].stats.pos.x + 0.0001,
+                                other.y as f32 - self.biots[idx].stats.pos.y + 0.0001,
                             )
                             .normalize(),
                         );
@@ -60,14 +58,14 @@ impl BiotCollection {
                     }
                 }
             }
-            let off = self.biots[n].step(&tree, feed_dir);
+            let off = self.biots[idx].step(&tree, feed_dir);
             if let Some(offspring) = off {
-                new.push(offspring);
+                self.offsprings.push(offspring);
             }
         }
-        // Compute biot interactions
-        for f in tree.iter() {
-            for s in tree.locate_within_distance([f.x, f.y], 50.)
+        // Compute biot interactions.
+        for f in &tree {
+            for s in tree.locate_within_distance([f.x, f.y], 50.0)
             //FIXME 30 is hardcoded
             {
                 if f.idx < s.idx {
@@ -77,8 +75,8 @@ impl BiotCollection {
             }
         }
         // Remove dead biots and add the new ones to the collection
-        self.biots.retain(|b| !b.is_dead());
-        self.biots.append(&mut new);
+        self.biots.retain(Biot::is_alive);
+        self.biots.append(&mut self.offsprings);
     }
 
     /// Display the biot collection
