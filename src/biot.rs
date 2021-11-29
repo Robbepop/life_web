@@ -38,13 +38,13 @@ impl Gene {
 /// The set of genes a biot is made of.
 #[derive(Debug, Clone)]
 pub struct Genome {
-    genes: [Gene; 13],
+    genes: [Gene; 32],
 }
 
 impl Genome {
     /// Creates a random biot genome.
     pub fn random() -> Self {
-        let mut genes = [Gene::None; 13];
+        let mut genes = [Gene::None; 32];
         for gene in &mut genes {
             *gene = Gene::random();
         }
