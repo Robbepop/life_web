@@ -32,27 +32,34 @@ impl BiotCollection {
                 })
                 .collect(),
         );
-        // Move and reproduce biots
+        // Move and reproduce biots.
         for idx in 0..(self.biots.len()) {
             let mut feed_dir: Option<Vec2> = None;
-            if self.biots[idx].properties.intelligence > 0.0 {
-                for (other, d2) in tree.nearest_neighbor_iter_with_distance_2(&[
-                    self.biots[idx].stats.pos.x as f64,
-                    self.biots[idx].stats.pos.y as f64,
-                ]) {
-                    if d2 as f32
-                        > (self.biots[idx].properties.intelligence
-                            * self.biots[idx].properties.intelligence)
-                            * 1600.0
-                    {
+            let intelligence = self.biots[idx].properties.intelligence;
+            if intelligence > 0.0 {
+                let pos = [
+                    self.biots[idx].stats.pos.x,
+                    self.biots[idx].stats.pos.y,
+                ];
+                for (neighbour, squared_distance) in
+                    tree.nearest_neighbor_iter_with_distance_2(&pos)
+                {
+                    if idx == neighbour.idx {
+                        // Do not move towards itself or produce with itself.
+                        continue;
+                    }
+                    let max_detection_distance = (intelligence * intelligence) * 1600.0;
+                    if squared_distance as f32 > max_detection_distance {
+                        // Victim is out of reach.
+                        //
+                        // Further iterated elements are farther away so we can break here.
                         break;
                     }
-                    if self.biots[idx].is_stronger(&self.biots[other.idx]) {
-                        // Add small offset to workaround rstart panic. TODO: report it upstream
+                    if self.biots[idx].is_stronger(&self.biots[neighbour.idx]) {
                         feed_dir = Some(
                             vec2(
-                                other.x as f32 - self.biots[idx].stats.pos.x + 0.0001,
-                                other.y as f32 - self.biots[idx].stats.pos.y + 0.0001,
+                                neighbour.x as f32 - self.biots[idx].stats.pos.x,
+                                neighbour.y as f32 - self.biots[idx].stats.pos.y,
                             )
                             .normalize(),
                         );
@@ -76,7 +83,7 @@ impl BiotCollection {
                 }
             }
         }
-        // Remove dead biots and add the new ones to the collection
+        // Remove dead biots and append the offsprings to the collection.
         self.biots.retain(Biot::is_alive);
         self.biots.append(&mut self.offsprings);
     }
