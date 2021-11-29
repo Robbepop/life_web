@@ -116,7 +116,7 @@ impl Properties {
     ///
     /// The metabolism indicates how much energy the biot requires for living.
     fn metabolism(&self) -> f32 {
-        0.2 * (4.5 * self.attack + 2.3 * self.defense + 2.5 * self.motion + 0.1 * self.intelligence)
+        0.07 * (4.5 * self.attack + 2.3 * self.defense + 2.5 * self.motion + 0.1 * self.intelligence)
     }
 
     /// Total weight of the biot, useful for computing its motion.
